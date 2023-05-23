@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Terminal Integration sample</string>
+
+    <string name="redeemTitle">Redeem section</string>
+    <string name="redeemAction">REDEEM</string>
+    <string name="redeemStyledAction">REDEEM STYLED</string>
+    <string name="redeemCanceled">Canceled</string>
+
+    <string name="issueTitle">Issue section</string>
+    <string name="issueAction">ISSUE</string>
+    <string name="issueStyledAction">ISSUE STYLED</string>
+    <string name="issueCanceled">Canceled</string>
+    <string name="issueResultTemplate">Issued %1$s ¤</string>
+
+    <string name="homeTitle">Home section</string>
+    <string name="homeAction">HOME</string>
+    <string name="homeStyledAction">HOME STYLED</string>
+    <string name="redeemAmountInputHint">Redeem amount</string>
+    <string name="issueAmountInputHint">Issue amount</string>
+</resources>
