@@ -3,7 +3,6 @@ package com.diggecard.terminal.sample
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,11 +47,12 @@ class ContentFragment : Fragment() {
     private fun bindHomeRequest() {
         homeLauncher =
             registerForActivityResult(HomeContentContract()) { homeResult: HomeResponseData? ->
-                if (homeResult?.redeemAmount != null) {
+                if (homeResult == null) {
+                    Toast.makeText(context, R.string.homeActionCancelledMessage, Toast.LENGTH_LONG)
+                        .show()
+                } else if (homeResult.redeemAmount != null) {
                     renderRedeemResult(homeResult.redeemAmount)
-                }
-
-                if (homeResult?.issueResult != null) {
+                } else if (homeResult.issueResult != null) {
                     renderIssueResult(homeResult.issueResult)
                 }
             }
@@ -78,9 +78,11 @@ class ContentFragment : Fragment() {
             }
 
         binding?.issueDefault?.setOnClickListener {
-            issueLauncher?.launch(IssueActionConfig(
-                issueAmount = getIssueAmount(),
-                externalReferenceId = SAMPLE_EXTERNAL_REF_ID)
+            issueLauncher?.launch(
+                IssueActionConfig(
+                    issueAmount = getIssueAmount(),
+                    externalReferenceId = SAMPLE_EXTERNAL_REF_ID
+                )
             )
         }
 
@@ -106,7 +108,6 @@ class ContentFragment : Fragment() {
             visibility = View.VISIBLE
             if (result == null) {
                 setText(R.string.issueCanceled)
-                Toast.makeText(context, "Issue cancelled", Toast.LENGTH_LONG).show()
                 setTextColor(NEGATIVE_RESULT_COLOR)
             } else {
                 text = """
@@ -117,8 +118,6 @@ class ContentFragment : Fragment() {
                             Phone: ${result.phone}.
                         """
                 setTextColor(POSITIVE_RESULT_COLOR)
-                Toast.makeText(context, "Issue result: $result", Toast.LENGTH_LONG)
-                    .show()
             }
         }
     }
@@ -151,15 +150,12 @@ class ContentFragment : Fragment() {
             if (redeemResult == null) {
                 setText(R.string.redeemCanceled)
                 setTextColor(NEGATIVE_RESULT_COLOR)
-                Toast.makeText(context, "Redemption cancelled", Toast.LENGTH_LONG).show()
             } else {
                 text = """
                     Redeem amount: ${redeemResult.redeemAmount}
                     Remaining to pay: ${redeemResult.remainingToPay}
                 """
                 setTextColor(POSITIVE_RESULT_COLOR)
-                Toast.makeText(context, "Redeem result: $redeemResult", Toast.LENGTH_LONG)
-                    .show()
             }
         }
     }
@@ -168,9 +164,5 @@ class ContentFragment : Fragment() {
         super.onDestroyView()
         binding = null
         redeemLauncher?.unregister()
-    }
-
-    private companion object {
-        const val TAG = "ContentFragment"
     }
 }

@@ -5,13 +5,15 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 
+const val HOME_ACTION = "com.diggecard.terminal.HOME"
+
 class HomeContentContract : ActivityResultContract<HomeActionConfig, HomeResponseData?>() {
 
     override fun createIntent(context: Context, input: HomeActionConfig) =
 
         // IMPORTANT: Make sure FLAG_ACTIVITY_NEW_TASK is not set as it's not
         // possible to pass results between tasks https://stackoverflow.com/a/15668778
-        Intent("com.diggecard.terminal.HOME").apply {
+        Intent(HOME_ACTION).apply {
             if (input.colorSchemeSeed != null) {
                 putExtra("color_scheme_seed", input.colorSchemeSeed)
             }

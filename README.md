@@ -46,61 +46,61 @@ In case the original action is `com.diggecard.terminal.HOME` `result_action` wil
 
 ### Redeem example:
 ```kotlin
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import androidx.activity.result.contract.ActivityResultContract
-
-const val REDEEM_ACTION = "com.diggecard.terminal.REDEEM"
-
-class RedeemContentContract : ActivityResultContract<RedeemActionConfig, Double?>() {
+class RedeemContentContract : ActivityResultContract<RedeemActionConfig, RedeemResultData?>() {
 
   // IMPORTANT: Make sure FLAG_ACTIVITY_NEW_TASK is not set as it's not
   // possible to pass results between tasks https://stackoverflow.com/a/15668778
   override fun createIntent(context: Context, input: RedeemActionConfig) =
-    Intent(REDEEM_ACTION).apply {
-      if (input.basketAmount != null) {
-        putExtra("basket_amount", input.basketAmount)
+      Intent(REDEEM_ACTION).apply {
+        if (input.basketAmount != null) {
+          putExtra("basket_amount", input.basketAmount)
+        }
+  
+        if (input.colorSchemeSeed != null) {
+          putExtra("color_scheme_seed", input.colorSchemeSeed)
+        }
+  
+        if (input.externalReferenceId != null) {
+          putExtra("external_reference_id", input.externalReferenceId)
+        }
       }
 
-      if (input.colorSchemeSeed != null) {
-        putExtra("color_scheme_seed", input.colorSchemeSeed)
-      }
-
-      if (input.externalReferenceId != null) {
-        putExtra("external_reference_id", input.externalReferenceId)
-      }
-    }
-
-  override fun parseResult(resultCode: Int, intent: Intent?): Double? =
+  override fun parseResult(resultCode: Int, intent: Intent?): RedeemResultData? =
       intentToResult(resultCode, intent)
 
   companion object {
-    fun intentToResult(resultCode: Int, intent: Intent?): Double? =
-      if (resultCode == Activity.RESULT_OK) {
-        intent?.getDoubleExtra("redeem_amount", -1.0)
-      } else {
-        null
-      }
+    fun intentToResult(resultCode: Int, intent: Intent?): RedeemResultData? =
+        if (resultCode == Activity.RESULT_OK && intent != null) {
+          RedeemResultData(
+                  intent.getDoubleExtra("redeem_amount", -1.0),
+                  intent.getDoubleExtra("remaining_to_pay", -1.0),
+          )
+        } else {
+          null
+        }
   }
 }
 
-data class RedeemActionConfig(
-    val basketAmount: Double?,
-    val externalReferenceId: String?,
-    val colorSchemeSeed: Int?,
+data class RedeemResultData(
+  val redeemAmount: Double,
+  val remainingToPay: Double,
 )
 
+data class RedeemActionConfig(
+  val basketAmount: Double?,
+  val externalReferenceId: String?,
+  val colorSchemeSeed: Int?,
+)
 
 ```
 
 in Activity / Fragment:
 ```kotlin
-registerForActivityResult(RedeemContentContract()) { redeemAmount: Double? ->
-  if (redeemAmount == null) {
+registerForActivityResult(RedeemContentContract()) { redeemResult: RedeemResultData? ->
+  if (redeemResult == null) {
     Toast.makeText(context, "Redemption cancelled", Toast.LENGTH_SHORT).show()
   } else {
-    Toast.makeText(context, "Redeem result: $redeemAmount", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, "Redeem result: $redeemResult", Toast.LENGTH_SHORT).show()
   }
 }
 ```

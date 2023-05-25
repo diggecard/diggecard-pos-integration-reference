@@ -17,4 +17,5 @@
     <string name="homeStyledAction">HOME STYLED</string>
     <string name="redeemAmountInputHint">Redeem amount</string>
     <string name="issueAmountInputHint">Issue amount</string>
+    <string name="homeActionCancelledMessage">Home action canceled</string>
 </resources>
