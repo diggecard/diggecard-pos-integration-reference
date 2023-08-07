@@ -31,8 +31,7 @@ class ContentFragment : Fragment() {
     private var issueLauncher: ActivityResultLauncher<IssueActionConfig>? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ) = FragmentContentBinding.inflate(inflater, container, false).also {
         binding = it
     }.root
@@ -58,14 +57,20 @@ class ContentFragment : Fragment() {
             }
 
         binding?.homeDefault?.setOnClickListener {
-            homeLauncher?.launch(HomeActionConfig(externalReferenceId = SAMPLE_EXTERNAL_REF_ID))
+            homeLauncher?.launch(
+                HomeActionConfig(
+                    externalReferenceId = SAMPLE_EXTERNAL_REF_ID,
+                    currency = getCurrency(),
+                )
+            )
         }
 
         binding?.homeStyled?.setOnClickListener {
             homeLauncher?.launch(
                 HomeActionConfig(
                     externalReferenceId = SAMPLE_EXTERNAL_REF_ID,
-                    colorSchemeSeed = context?.getColor(R.color.primary)
+                    colorSchemeSeed = context?.getColor(R.color.primary),
+                    currency = getCurrency(),
                 )
             )
         }
@@ -73,7 +78,7 @@ class ContentFragment : Fragment() {
 
     private fun bindIssueRequest() {
         issueLauncher =
-            registerForActivityResult(IssueResultContract()) { result: IssueResultData? ->
+            registerForActivityResult(IssueResultContract()) { result: IssueResultData ->
                 renderIssueResult(result)
             }
 
@@ -81,7 +86,8 @@ class ContentFragment : Fragment() {
             issueLauncher?.launch(
                 IssueActionConfig(
                     issueAmount = getIssueAmount(),
-                    externalReferenceId = SAMPLE_EXTERNAL_REF_ID
+                    externalReferenceId = SAMPLE_EXTERNAL_REF_ID,
+                    currency = getCurrency(),
                 )
             )
         }
@@ -91,72 +97,100 @@ class ContentFragment : Fragment() {
                 IssueActionConfig(
                     issueAmount = getIssueAmount(),
                     externalReferenceId = SAMPLE_EXTERNAL_REF_ID,
+                    currency = getCurrency(),
                     colorSchemeSeed = context?.getColor(R.color.primary),
                 ),
             )
         }
     }
 
-    private fun getIssueAmount(): Double? =
-        binding?.let {
-            val amount = it.issueAmount.text.toString().toDoubleOrNull()
-            return if (amount != null && amount > 0) amount else null
-        }
+    private fun getIssueAmount(): Double? = binding?.let {
+        val amount = it.issueAmount.text.toString().toDoubleOrNull()
+        return if (amount != null && amount > 0) amount else null
+    }
 
-    private fun renderIssueResult(result: IssueResultData?) {
+    private fun renderIssueResult(result: IssueResultData) {
         binding?.issueResult?.apply {
             visibility = View.VISIBLE
-            if (result == null) {
-                setText(R.string.issueCanceled)
-                setTextColor(NEGATIVE_RESULT_COLOR)
-            } else {
-                text = """
-                            Issued amount: ${result.issueAmount};
-                            Card type: ${result.cardType};
-                            Card number ${result.cardNumber};
-                            Email: ${result.email};
-                            Phone: ${result.phone}.
-                        """
-                setTextColor(POSITIVE_RESULT_COLOR)
+            when (result) {
+                is IssueResultDataCancelled -> {
+                    if (result.reason == "currency_not_supported") {
+                        setText(R.string.redeemNotSupportedCurrency)
+                    } else {
+                        setText(R.string.redeemCanceled)
+                    }
+
+                    setText(R.string.issueCanceled)
+                    setTextColor(NEGATIVE_RESULT_COLOR)
+                }
+
+                is IssueResultDataSuccess -> {
+                    text = """
+                                    Issued amount: ${result.issueAmount};
+                                    Card type: ${result.cardType};
+                                    Card number ${result.cardNumber};
+                                    Email: ${result.email};
+                                    Phone: ${result.phone}.
+                                """
+                    setTextColor(POSITIVE_RESULT_COLOR)
+                }
             }
         }
     }
 
     private fun bindRedeemRequest() {
         redeemLauncher =
-            registerForActivityResult(RedeemContentContract()) { redeemResult: RedeemResultData? ->
+            registerForActivityResult(RedeemContentContract()) { redeemResult: RedeemResultData ->
                 renderRedeemResult(redeemResult)
             }
 
         binding?.redeemDefault?.setOnClickListener {
             val amount = binding?.basketAmount?.text?.toString()?.toDoubleOrNull()
-            redeemLauncher?.launch(RedeemActionConfig(amount, SAMPLE_EXTERNAL_REF_ID, null))
+            redeemLauncher?.launch(
+                RedeemActionConfig(
+                    amount, SAMPLE_EXTERNAL_REF_ID, null, getCurrency()
+                )
+            )
         }
 
         binding?.redeemStyled?.setOnClickListener {
             val amount = binding?.basketAmount?.text?.toString()?.toDoubleOrNull()
             redeemLauncher?.launch(
                 RedeemActionConfig(
-                    amount,
-                    "0xDEADBEEF",
-                    context?.getColor(R.color.primary)
+                    amount, "0xDEADBEEF", context?.getColor(R.color.primary), getCurrency()
                 )
             )
         }
     }
 
-    private fun renderRedeemResult(redeemResult: RedeemResultData?) {
+    private fun renderRedeemResult(redeemResult: RedeemResultData) {
         binding?.redeemResult?.apply {
-            if (redeemResult == null) {
-                setText(R.string.redeemCanceled)
-                setTextColor(NEGATIVE_RESULT_COLOR)
-            } else {
-                text = """
-                    Redeem amount: ${redeemResult.redeemAmount}
-                    Remaining to pay: ${redeemResult.remainingToPay}
-                """
-                setTextColor(POSITIVE_RESULT_COLOR)
+            when (redeemResult) {
+                is RedeemResultDataCanceled -> {
+                    if (redeemResult.reason == "currency_not_supported") {
+                        setText(R.string.redeemNotSupportedCurrency)
+                    } else {
+                        setText(R.string.redeemCanceled)
+                    }
+                    setTextColor(NEGATIVE_RESULT_COLOR)
+                }
+
+                is RedeemResultDataSuccess -> {
+                    text = """
+                            Redeem amount: ${redeemResult.redeemAmount}
+                            Remaining to pay: ${redeemResult.remainingToPay}
+                        """
+                    setTextColor(POSITIVE_RESULT_COLOR)
+                }
             }
+        }
+    }
+
+    private fun getCurrency(): String? {
+        return when (binding?.currencyGroup?.checkedRadioButtonId) {
+            R.id.currencyUsd -> "USD"
+            R.id.currencyGbp -> "GBP"
+            else -> null
         }
     }
 

@@ -13,9 +13,13 @@
     <string name="issueResultTemplate">Issued %1$s ¤</string>
 
     <string name="homeTitle">Home section</string>
+    <string name="currencyTitle">Currency</string>
+    <string name="currencyGbp">GBP</string>
+    <string name="currencyUsd">USD</string>
     <string name="homeAction">HOME</string>
     <string name="homeStyledAction">HOME STYLED</string>
     <string name="redeemAmountInputHint">Redeem amount</string>
     <string name="issueAmountInputHint">Issue amount</string>
     <string name="homeActionCancelledMessage">Home action canceled</string>
+    <string name="redeemNotSupportedCurrency">Currency not supported</string>
 </resources>

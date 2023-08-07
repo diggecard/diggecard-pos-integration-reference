@@ -188,6 +188,56 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/_homeTitle"
             />
+
+        <View
+            android:id="@+id/_currencyDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintTop_toBottomOf="@id/homeDefault"
+            />
+
+        <TextView
+            android:id="@+id/_currencyTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/currencyTitle"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/_currencyDivider"
+            />
+
+        <RadioGroup
+            android:id="@+id/currencyGroup"
+            android:paddingTop="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:orientation="horizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/_currencyTitle"
+            app:layout_constraintTop_toBottomOf="@+id/_currencyDivider"
+            >
+
+            <RadioButton
+                android:id="@+id/currencyGbp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/currencyGbp"
+                android:paddingStart="0dp"
+                android:paddingEnd="16dp"
+                />
+            <RadioButton
+                android:id="@+id/currencyUsd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/currencyUsd"
+                />
+        </RadioGroup>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
 

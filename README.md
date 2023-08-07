@@ -7,6 +7,10 @@ For now the app supports 3 actions:
 
 * `com.diggecard.terminal.HOME` - leads user to the home screen.
   The result will depend on which flow user selects on home screen. See `com.diggecard.terminal.REDEEM` and `com.diggecard.terminal.ISSUE` actions.
+  ```text
+    input fields:
+        currency: String? // ISO-4217 currency codes
+  ```
 * `com.diggecard.terminal.REDEEM` - leads user to the redemption flow. In case the user terminates the flow -
   `Intent.RESULT_CANCELED` is returned. In case user finishes the flow successfully - Intent.RESULT_OK is
   returned.
@@ -16,6 +20,7 @@ For now the app supports 3 actions:
           basket_amount: Double?
           external_reference_id: String?
           color_scheme_seed: Integer?(experimental) // may be removed in the future
+          currency: String? // ISO-4217 currency codes
         result fields
           result_action: String // com.diggecard.terminal.REDEEM
           redeem_amount: Double
@@ -29,6 +34,7 @@ For now the app supports 3 actions:
         input fields:
           external_reference_id: String?
           color_scheme_seed: Integer? (experimental) // may be removed in the future
+          currency: String? // ISO-4217 currency codes
         result fields:
           result_action: String // com.diggecard.terminal.ISSUE
           card_type: String // refund_card or gift_card
@@ -43,6 +49,10 @@ try to apply the color for the flows.
 Each result intent with `Intent.RESULT_OK` contains `result_action` field, which 
  may content `com.diggecard.terminal.REDEEM` or `com.diggecard.terminal.ISSUE` values.
 In case the original action is `com.diggecard.terminal.HOME` `result_action` will depend on the selected flow by the suer.
+
+Some `Intent.RESULT_CANCELLED` may contain `reason` string field, which may specify the
+cancellation reason:
+  * currency_not_supported - you ask to run an action with a currency which is not supported by the terminal merchant
 
 ### Redeem example:
 ```kotlin
@@ -62,6 +72,10 @@ class RedeemContentContract : ActivityResultContract<RedeemActionConfig, RedeemR
   
         if (input.externalReferenceId != null) {
           putExtra("external_reference_id", input.externalReferenceId)
+        }
+
+        if (input.currency != null) {
+          putExtra("currency", input.currency)
         }
       }
 
@@ -90,6 +104,7 @@ data class RedeemActionConfig(
   val basketAmount: Double?,
   val externalReferenceId: String?,
   val colorSchemeSeed: Int?,
+  val currency: String?,
 )
 
 ```
@@ -128,6 +143,10 @@ class IssueResultContract : ActivityResultContract<IssueActionConfig, IssueResul
       if (input.externalReferenceId != null) {
         putExtra("external_reference_id", input.externalReferenceId)
       }
+      
+      if (input.currency != null) {
+        putExtra("currency", input.currency)
+      }
     }
 
   override fun parseResult(resultCode: Int, intent: Intent?): IssueResultData? =
@@ -154,6 +173,7 @@ class IssueResultContract : ActivityResultContract<IssueActionConfig, IssueResul
 data class IssueActionConfig(
     val externalReferenceId: String? = null,
     val colorSchemeSeed: Int? = null,
+    currency: String?
 )
 
 data class IssueResultData(
@@ -202,6 +222,10 @@ class HomeContentContract : ActivityResultContract<HomeActionConfig, HomeRespons
       if (input.externalReferenceId != null) {
         putExtra("external_reference_id", input.externalReferenceId)
       }
+
+      if (input.currency != null) {
+        putExtra("currency", input.currency)
+      }
     }
 
   override fun parseResult(resultCode: Int, intent: Intent?): HomeResponseData? =
@@ -234,6 +258,7 @@ class HomeContentContract : ActivityResultContract<HomeActionConfig, HomeRespons
 data class HomeActionConfig(
   val externalReferenceId: String? = null,
   val colorSchemeSeed: Int? = null,
+  val currency: String?,
 )
 
 data class HomeResponseData(

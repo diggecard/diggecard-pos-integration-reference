@@ -21,6 +21,10 @@ class HomeContentContract : ActivityResultContract<HomeActionConfig, HomeRespons
             if (input.externalReferenceId != null) {
                 putExtra("external_reference_id", input.externalReferenceId)
             }
+
+            if (input.currency != null) {
+                putExtra("currency", input.currency)
+            }
         }
 
     override fun parseResult(resultCode: Int, intent: Intent?): HomeResponseData? =
@@ -53,6 +57,7 @@ class HomeContentContract : ActivityResultContract<HomeActionConfig, HomeRespons
 data class HomeActionConfig(
     val externalReferenceId: String? = null,
     val colorSchemeSeed: Int? = null,
+    val currency: String? = null,
 )
 
 data class HomeResponseData(
