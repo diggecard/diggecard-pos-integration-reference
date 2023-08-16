@@ -33,6 +33,7 @@ For now the app supports 3 actions:
     ```text
         input fields:
           external_reference_id: String?
+          issue_amount: Double? // issuing amount(optional, may be entered later in the app)
           color_scheme_seed: Integer? (experimental) // may be removed in the future
           currency: String? // ISO-4217 currency codes
         result fields:
